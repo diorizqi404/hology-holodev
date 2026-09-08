@@ -1,7 +1,12 @@
 # AI/Data v0.2 Test Report
 
-**Tanggal:** 3 September 2026  
-**Command:** `python data/evidence/v0.2/test_reasoning_v0_2.py`
+**Diperbarui:** 6 September 2026
+**Commands:**
+
+```text
+python data/evidence/v0.2/validate_contract_pack_v0_2.py
+python data/evidence/v0.2/test_reasoning_v0_2.py
+```
 
 ## Result
 
@@ -30,3 +35,18 @@ setiap skenario lolos JSON Schema draft 2020-12. Test memastikan:
 Contract-pack validation juga memastikan canonical BMKG example lolos schema,
 urutan timestamp valid, option ID unik, scenario/expected result 8/8 lengkap,
 serta safety flags ruleset tetap terkunci.
+
+## Contract validation result
+
+```text
+BMKG canonical schema: PASS
+Canonical temporal/provenance invariants: PASS
+Mock provenance protection: PASS
+Action option registry invariants: PASS
+Scenario/expected-result coverage: PASS (8/8)
+Ruleset safety invariants: PASS
+```
+
+Mock protection mencakup positive fixture semantics dan negative gates untuk
+kombinasi provenance yang tidak konsisten. Action-option validation juga
+mewajibkan `option_id`, `title`, `description`, dan `rationale` terisi.

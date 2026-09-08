@@ -1,11 +1,11 @@
-import 'dotenv/config';
+import { config } from '../src/config.js';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../src/infrastructure/persistence/database.types.js';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const email = process.env.DEMO_USER_EMAIL ?? 'demo@rembuktani.local';
-const password = process.env.DEMO_USER_PASSWORD ?? 'RembukTani-Demo-2026!';
+const supabaseUrl = config.supabaseUrl;
+const serviceRoleKey = config.serviceRoleKey;
+const email = config.email ?? 'demo@rembuktani.local';
+const password = config.password ?? 'RembukTani-Demo-2026!';
 
 if (!supabaseUrl || !serviceRoleKey) {
   throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');

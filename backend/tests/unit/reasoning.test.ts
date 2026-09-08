@@ -20,6 +20,7 @@ const bmkgEvidence = {
 const baseInput: ReasoningInput = {
   decisionCaseId: 'CASE-001',
   evaluatedAt: '2026-09-05T08:15:00Z',
+  cropContext: { cropContextId: 'CROP-001', cropName: 'Padi Sawah', varietyName: 'Inpari 32 HDB', growthStage: 'flowering' },
   bmkg: { evidenceId: 'EVD-BMKG-001', evidence: bmkgEvidence, delivery: 'live' },
   fieldPulse: { evidenceId: 'EVD-FIELD-001', observedAt: '2026-09-05T08:10:00Z', waterPresence: 'limited', irrigationFlow: 'not_flowing' },
 };
@@ -29,13 +30,20 @@ test('returns context_available with alternatives only for complete evidence', (
   assert.equal(result.contextState, 'context_available');
   assert.equal(result.confidence, 'medium');
   assert.equal(result.recommendation.recommendedOptionId, null);
-  assert.equal(result.actionOptions.length, 2);
+  assert.equal(result.actionSelection.source, 'rule_catalog');
+  assert.equal(result.actionSelection.ranking, null);
+  assert.deepEqual(result.actionOptions.map((option) => option.optionId), [
+    'OPT-VERIFY-FIELD',
+    'OPT-COLLECT-WATER-SOURCE',
+    'OPT-REQUEST-REVIEW',
+  ]);
+  assert.ok(result.factors.some((factor) => factor.includes('growth stage: flowering')));
 });
 
 test('keeps unknown field observations valid and requests verification', () => {
   const result = new WaterReasoningEngine().evaluate({
     ...baseInput,
-    fieldPulse: { ...baseInput.fieldPulse, irrigationFlow: 'unknown' },
+    fieldPulse: { ...baseInput.fieldPulse!, irrigationFlow: 'unknown' },
   });
   assert.equal(result.contextState, 'needs_verification');
   assert.ok(result.explanation.unknownItems.some((item) => item.code === 'irrigation_flow_unknown'));
@@ -48,4 +56,5 @@ test('abstains when BMKG evidence is unavailable', () => {
   });
   assert.equal(result.contextState, 'insufficient_evidence');
   assert.ok(result.missingEvidence.includes('bmkg_forecast'));
+  assert.deepEqual(result.actionOptions.map((option) => option.optionId), ['OPT-DEFER']);
 });

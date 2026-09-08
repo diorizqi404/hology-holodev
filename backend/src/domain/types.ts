@@ -10,7 +10,7 @@ export interface Profile {
   id: string; // UUID
   user_id: string; // UUID (FK to auth.users)
   display_name: string;
-  role: 'farmer' | 'farmer_group_leader' | 'ppl' | 'admin';
+  role: 'farmer' | 'reviewer';
   avatar_url?: string;
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp
@@ -29,6 +29,7 @@ export interface Land {
   description?: string;
   latitude: number; // DECIMAL(10, 8)
   longitude: number; // DECIMAL(11, 8)
+  boundary_polygon?: [number, number][];
   province?: string;
   regency?: string;
   district?: string;
@@ -81,6 +82,7 @@ export interface DecisionCase {
   crop_context_id: string; // UUID (FK to crop_contexts)
   created_by: string; // UUID (FK to profiles)
   decision_type: string;
+  selected_action_option_id?: string;
   status: DecisionCaseStatus;
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp

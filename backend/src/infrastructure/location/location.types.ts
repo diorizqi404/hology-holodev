@@ -10,6 +10,7 @@ export type BoundaryCandidate = Coordinates & {
   district?: string;
   regency?: string;
   province?: string;
+  adm4Candidate?: string;
 };
 
 export type Adm4Verification = {

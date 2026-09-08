@@ -4,6 +4,7 @@ export type DecisionBriefInput = {
   decisionCase: DecisionCase;
   decisionRecord: DecisionRecord;
   assessment?: Assessment | null;
+  trustedReviews?: Array<{ reviewerName?: string | null; status: string; comment?: string | null }>;
 };
 
 const decisionLabel: Record<DecisionRecord['decision_type'], string> = {
@@ -16,6 +17,7 @@ export const formatDecisionBrief = ({
   decisionCase,
   decisionRecord,
   assessment,
+  trustedReviews = [],
 }: DecisionBriefInput): string => {
   const lines = [
     'RembukTani - Decision Brief',
@@ -30,6 +32,9 @@ export const formatDecisionBrief = ({
   if (assessment) {
     lines.push(`Dasar penilaian: ${assessment.basis_strength ?? 'insufficient'}`);
     lines.push(`Ringkasan assessment: ${assessment.summary}`);
+  }
+  for (const review of trustedReviews) {
+    lines.push(`Review manusia (${review.reviewerName || 'Reviewer'} · ${review.status}): ${review.comment || 'Tidak ada catatan tambahan.'}`);
   }
 
   lines.push(

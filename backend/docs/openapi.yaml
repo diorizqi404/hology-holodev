@@ -33,6 +33,40 @@ paths:
       parameters: [{ $ref: '#/components/parameters/LandId' }]
       responses:
         '200': { description: Active crop context }
+  /lands/{landId}:
+    get:
+      summary: Get one owned land with its active crop context
+      parameters: [{ $ref: '#/components/parameters/LandId' }]
+      responses:
+        '200': { description: Land detail }
+        '403': { description: Land belongs to another profile }
+        '404': { description: Land not found }
+    patch:
+      summary: Update one owned land
+      parameters: [{ $ref: '#/components/parameters/LandId' }]
+      responses:
+        '200': { description: Land updated }
+    delete:
+      summary: Soft-archive one owned land
+      parameters: [{ $ref: '#/components/parameters/LandId' }]
+      responses:
+        '200': { description: Land archived }
+  /lands/{landId}/crops:
+    get:
+      summary: List crop-context versions for an owned land
+      parameters: [{ $ref: '#/components/parameters/LandId' }]
+      responses:
+        '200': { description: Crop-context history }
+    post:
+      summary: Create and activate a crop context
+      parameters: [{ $ref: '#/components/parameters/LandId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CropContextInput' }
+      responses:
+        '201': { description: Crop context created }
   /decision-cases:
     get:
       summary: Get decision history for an owner
@@ -74,10 +108,14 @@ paths:
   /decision-cases/{decisionCaseId}/reviews:
     post:
       summary: Request or submit trusted review
+      description: >
+        Without `status`, the land owner (farmer) requests review (`review_pending`).
+        With `status` (`approve`|`reject`), only profiles with role `reviewer` may submit.
       parameters: [{ $ref: '#/components/parameters/DecisionCaseId' }]
       responses:
         '202': { description: Review requested }
         '201': { description: Review submitted }
+        '403': { description: Caller is not allowed to submit a review }
   /decision-cases/{decisionCaseId}/decision:
     post:
       summary: Confirm explicit human decision
@@ -123,13 +161,16 @@ components:
   schemas:
     LandInput:
       type: object
-      required: [owner_id, name, latitude, longitude]
+      required: [name, latitude, longitude]
       properties:
-        owner_id: { type: string, format: uuid }
         name: { type: string }
         latitude: { type: number }
         longitude: { type: number }
-        adm4_code: { type: string }
+        province: { type: string, description: Client-provided fallback when location cannot be verified automatically. }
+        regency: { type: string, description: Client-provided fallback when location cannot be verified automatically. }
+        district: { type: string, description: Client-provided fallback when location cannot be verified automatically. }
+        village: { type: string, description: Client-provided fallback when location cannot be verified automatically. }
+        adm4_code: { type: string, description: BMKG ADM4 code in AA.BB.CC.DDDD format. }
     DecisionCaseInput:
       type: object
       required: [land_id, crop_context_id, created_by, decision_type]
@@ -146,6 +187,14 @@ components:
         irrigation_flow: { type: string, enum: [flowing, limited, not_flowing, unknown] }
         observed_at: { type: string, format: date-time }
         is_mock: { type: boolean }
+    CropContextInput:
+      type: object
+      required: [crop_name, growth_stage]
+      properties:
+        crop_name: { type: string }
+        variety_name: { type: string }
+        growth_stage: { type: string, enum: [vegetative, flowering, ripening, unknown] }
+        planting_date: { type: string, format: date }
     DecisionInput:
       type: object
       required: [decided_by, assessment_id, decision_type, decision_text]

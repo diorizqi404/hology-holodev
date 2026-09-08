@@ -1,4 +1,19 @@
-# React + TypeScript + Vite
+# RembukTani Frontend
+
+## Local setup
+
+1. Copy `.env.example` to `.env`.
+2. Ensure the backend runs on port `3000`, or change `VITE_API_BASE_URL`.
+3. Run `npm install` and `npm run dev`.
+
+The authentication flow is `/register` or `/login` → authenticated `/farmer/dashboard`. “Ingat saya” persists the session in local storage; otherwise it lasts for the browser tab session. Expired access tokens are refreshed through the backend. The PWA manifest and service worker are enabled in production builds.
+
+Farmer pages use the authenticated API rather than demo arrays:
+
+- `GET /api/lands` for dashboard and land list;
+- `GET /api/lands/:id` for land detail;
+- `POST /api/lands` followed by `POST /api/lands/:id/crops` for the add-land wizard;
+- the three-step draft is kept in `sessionStorage` and cleared after persistence.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

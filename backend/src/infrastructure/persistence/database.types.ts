@@ -47,6 +47,7 @@ export type Database = {
           description: string | null
           latitude: number
           longitude: number
+          boundary_polygon: [number, number][] | null
           province: string | null
           regency: string | null
           district: string | null
@@ -83,6 +84,7 @@ export type Database = {
           description?: string | null
           latitude?: number
           longitude?: number
+          boundary_polygon?: [number, number][] | null
           province?: string | null
           regency?: string | null
           district?: string | null
@@ -155,6 +157,7 @@ export type Database = {
           crop_context_id: string
           created_by: string
           decision_type: string
+          selected_action_option_id: string | null
           status: string
           created_at: string
           updated_at: string
@@ -166,6 +169,7 @@ export type Database = {
           crop_context_id: string
           created_by: string
           decision_type: string
+          selected_action_option_id?: string | null
           status?: string
           created_at?: string
           updated_at?: string
@@ -177,6 +181,7 @@ export type Database = {
           crop_context_id?: string
           created_by?: string
           decision_type?: string
+          selected_action_option_id?: string | null
           status?: string
           created_at?: string
           updated_at?: string

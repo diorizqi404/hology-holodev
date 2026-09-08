@@ -2,6 +2,12 @@
 
 ## Contract yang diberikan
 
+- BMKG integration contract (`BMKG_INTEGRATION_CONTRACT_v0.1.md`);
+- canonical evidence semantic index (`CANONICAL_EVIDENCE_SCHEMA_v0.1.md`);
+- confidence strength-of-basis semantics (`CONFIDENCE_SEMANTICS.md`);
+- action catalog dengan ID stabil dan metadata UI/API (`ACTION_OPTIONS_CATALOG.md`);
+- crop-context rule boundary (`CROP_CONTEXT_RULE_MAPPING.md`);
+- cached/mock integration gates (`ADDITIONAL_INTEGRATION_TEST_SCENARIOS.md`);
 - BMKG documented-field dictionary dan contoh struktur live;
 - mapping raw BMKG ke canonical evidence;
 - Field Pulse enum + unknown semantics;
@@ -38,6 +44,27 @@
 - Assessment dapat unavailable/abstained.
 - Tidak ada ranking, numeric risk score, atau final decision otomatis.
 - Decision Record menyimpan snapshot/references dan tidak silent overwrite.
+- Stable `option_id` dipertahankan saat persistence; UUID hanya row identifier.
+- `official/external_api/is_mock=false` dan `official_mock/fixture/is_mock=true`.
+- Delivery `live|cached` tidak disamakan dengan freshness.
+- Crop stage tidak otomatis menjadi risk label.
+- Confidence tidak ditampilkan sebagai probabilitas atau persentase.
+
+## Minimum response yang dikonsumsi frontend
+
+```text
+status, context_state, confidence
+factors[], missing_evidence[], limitations[]
+action_options[] (stable option_id)
+recommendation.recommended_option_id = null
+evaluated_at, ruleset_version
+bmkg_delivery, bmkg_freshness, field_pulse_freshness
+```
+
+Jika engine/validation gagal, backend mengembalikan atau menyimpan
+`assessment_unavailable` tanpa action option. Jika evidence utama tidak cukup,
+hasilnya `insufficient_evidence` dan abstained, bukan HTTP success dengan fakta
+buatan.
 
 ## Commands sebelum integrasi
 

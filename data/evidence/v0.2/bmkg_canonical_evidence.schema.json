@@ -86,5 +86,41 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source": {"properties": {"category": {"const": "official"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "collection_mode": {"const": "external_api"},
+              "is_mock": {"const": false}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source": {"properties": {"category": {"const": "official_mock"}}}
+        }
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "properties": {
+              "collection_mode": {"const": "fixture"},
+              "is_mock": {"const": true}
+            }
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }

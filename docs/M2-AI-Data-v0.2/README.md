@@ -1,7 +1,7 @@
 # RembukTani — AI/Data Contract Pack v0.2
 
 **Tanggal:** 3 September 2026  
-**Status:** proposal implementable; semantic/schema final menunggu review Full-stack  
+**Status:** executable contract; audit v0.3 closed dan scenario matrix lulus
 **Source of truth:** `docs/role/LAPORAN_KONTEKS_PROYEK_REMBUKTANI_v0.2.md`
 
 Paket ini merekonsiliasi baseline HOL-86/HOL-87 v0.1 dengan produk berbasis
@@ -21,6 +21,16 @@ lahan dan BMKG Public Forecast API aktual.
 - `CROSS_ROLE_REVIEW.md`
 - `HANDOFF_FULLSTACK.md`
 - `TEST_REPORT.md`
+- `AI_DATA_POST_MERGE_AUDIT_2026-09-05.md`
+- `BMKG_INTEGRATION_CONTRACT_v0.1.md`
+- `CANONICAL_EVIDENCE_SCHEMA_v0.1.md`
+- `CONFIDENCE_SEMANTICS.md`
+- `ACTION_OPTIONS_CATALOG.md`
+- `CROP_CONTEXT_RULE_MAPPING.md`
+- `ADDITIONAL_INTEGRATION_TEST_SCENARIOS.md`
+- `AI_DATA_REVIEW_CLOSURE_2026-09-06.md`
+- `AI_DATA_AUDIT_FEEDBACK_V03_CLOSURE_2026-09-07.md`
+- `AI_REASONING_SCENARIO_TEST_REPORT_v0.4.md`
 
 Artefak executable berada di `data/evidence/v0.2/`.
 
@@ -33,6 +43,13 @@ Backend dapat memulai dengan dua pemeriksaan kontrak:
 ```text
 python data/evidence/v0.2/validate_contract_pack_v0_2.py
 python data/evidence/v0.2/test_reasoning_v0_2.py
+```
+
+Suite kontrak TypeScript/backend terbaru:
+
+```text
+cd backend
+npm run test:ai-contract
 ```
 
 ## Boundary

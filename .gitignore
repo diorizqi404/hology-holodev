@@ -4,3 +4,7 @@
 backend/dist
 frontend/dist
 node_modules
+__pycache__/
+*.py[cod]
+*.cursor
+*.skill

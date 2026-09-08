@@ -8,6 +8,9 @@ type CachedBmkgResponse = {
   requestUri: string;
 };
 
+const bmkgRequestUri = (adm4: string): string =>
+  `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${encodeURIComponent(adm4)}`;
+
 export class SupabaseBmkgCache {
   public constructor(
     private readonly supabase: SupabaseClient,
@@ -18,7 +21,7 @@ export class SupabaseBmkgCache {
   public async get(adm4: string): Promise<CachedBmkgResponse | undefined> {
     const { data, error } = await this.supabase
       .from('external_source_cache')
-      .select('raw_payload, fetched_at, request_key, request_uri, expires_at')
+      .select('raw_payload, fetched_at, request_key, expires_at')
       .eq('source_name', 'BMKG')
       .eq('request_key', adm4)
       .eq('status', 'success')
@@ -35,7 +38,7 @@ export class SupabaseBmkgCache {
       adm4,
       rawPayload,
       fetchedAt: data.fetched_at,
-      requestUri: data.request_uri ?? '',
+      requestUri: bmkgRequestUri(adm4),
     };
   }
 
@@ -50,7 +53,6 @@ export class SupabaseBmkgCache {
         request_key: entry.adm4,
         adm4_code: entry.adm4,
         raw_payload: entry.rawPayload,
-        request_uri: entry.requestUri,
         fetched_at: entry.fetchedAt,
         expires_at: expiresAt,
         status: 'success',

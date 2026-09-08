@@ -3,6 +3,7 @@ import type {
   ReasoningAssessment,
   ReasoningInput,
 } from './reasoning.types.js';
+import { mapActions, type ActionTrigger } from './action-catalog.js';
 
 const validObservedAt = (value: string | undefined, evaluatedAt: string): boolean => {
   if (!value) return false;
@@ -47,6 +48,15 @@ export class WaterReasoningEngine {
     const limitationCodes = [...limitations];
     const unknownItems: Array<{ code: string; required: boolean }> = [];
 
+    if (input.cropContext) {
+      factors.push(`Crop context: ${input.cropContext.cropName}; growth stage: ${input.cropContext.growthStage}`);
+      if (input.cropContext.growthStage === 'unknown') {
+        unknownItems.push({ code: 'crop_growth_stage_unknown', required: false });
+      }
+    } else {
+      missingEvidence.push('crop_context');
+    }
+
     if (input.bmkg) {
       factorItems.push({ code: 'bmkg_forecast_available', evidenceId: input.bmkg.evidenceId });
       factors.push(`BMKG forecast: ${forecastDescription(input) ?? 'description unavailable'}`);
@@ -77,66 +87,47 @@ export class WaterReasoningEngine {
     let contextState: ReasoningAssessment['contextState'];
     let confidence: ReasoningAssessment['confidence'];
     let basisCodes: string[];
-    let optionSet: ReasoningAssessment['actionOptions'];
+    const actionTriggers = new Set<ActionTrigger>();
 
     if (!hasBmkg || !input.fieldPulse || !validObservedAt(input.fieldPulse.observedAt, input.evaluatedAt)) {
       contextState = 'insufficient_evidence';
       confidence = 'low';
       basisCodes = hasBmkg ? ['bmkg_current'] : [];
-      optionSet = [
-        {
-          optionId: 'OPT-COLLECT-EVIDENCE',
-          title: 'Lengkapi observasi lapangan',
-          description: 'Periksa kondisi air di petak dan aliran irigasi sebelum mengambil keputusan.',
-          rationale: 'Bukti lapangan atau prakiraan BMKG belum lengkap untuk penilaian konteks.',
-        },
-      ];
+      actionTriggers.add('always');
     } else if (!completePulse || partialPulse) {
       contextState = 'needs_verification';
       confidence = 'low';
       basisCodes = hasBmkg ? ['bmkg_current', 'field_partial'] : ['field_partial'];
-      optionSet = [
-        {
-          optionId: 'OPT-VERIFY-WATER',
-          title: 'Verifikasi kondisi air',
-          description: 'Lakukan pengecekan langsung pada informasi Field Pulse yang belum pasti.',
-          rationale: 'Sebagian observasi lapangan masih unknown atau belum lengkap.',
-        },
-        {
-          optionId: 'OPT-CONSULT-TRUSTED-REVIEWER',
-          title: 'Minta tinjauan pihak tepercaya',
-          description: 'Bagikan konteks dan bukti yang tersedia untuk ditinjau.',
-          rationale: 'Tinjauan tambahan dapat membantu ketika bukti lapangan belum lengkap.',
-        },
-      ];
+      actionTriggers.add('important_information_missing');
+      actionTriggers.add('human_review_useful');
+      actionTriggers.add('always');
     } else {
       contextState = 'context_available';
       confidence = 'medium';
       basisCodes = ['bmkg_current', 'field_complete'];
-      optionSet = [
-        {
-          optionId: 'OPT-CHECK-WATER',
-          title: 'Cek kondisi air di petak',
-          description: 'Lakukan pengecekan kondisi air sebelum tindakan lanjutan.',
-          rationale: 'Bukti lapangan lengkap dan prakiraan BMKG tersedia sebagai konteks.',
-        },
-        {
-          optionId: 'OPT-CHECK-IRRIGATION',
-          title: 'Cek aliran irigasi',
-          description: 'Periksa aliran irigasi dan catat perubahan yang terlihat.',
-          rationale: 'Observasi aliran irigasi tersedia sebagai bagian dari Field Pulse.',
-        },
-      ];
+      if (input.fieldPulse?.waterPresence === 'limited' || input.fieldPulse?.waterPresence === 'none' || input.fieldPulse?.irrigationFlow === 'not_flowing') {
+        actionTriggers.add('water_limited_or_irrigation_not_flowing');
+      }
+      actionTriggers.add('human_review_useful');
     }
+
+    const optionSet = mapActions(contextState, actionTriggers);
+    const summary = contextState === 'context_available'
+      ? 'Konteks kondisi tersedia dari bukti yang tercatat; alternatif aman dapat ditinjau oleh petani.'
+      : contextState === 'needs_verification'
+        ? 'Sebagian kondisi sudah tercatat, tetapi informasi penting masih perlu diverifikasi.'
+        : 'Bukti utama belum cukup untuk membentuk alternatif tindakan spesifik.';
 
     return {
       status: 'available',
+      summary,
       contextState,
       confidence,
       factors,
       missingEvidence,
       limitations,
       actionOptions: optionSet,
+      actionSelection: { source: 'rule_catalog', ranking: null },
       recommendation: { mode: 'alternatives_only', recommendedOptionId: null },
       evaluatedAt: input.evaluatedAt,
       rulesetVersion: 'water-v0.2',

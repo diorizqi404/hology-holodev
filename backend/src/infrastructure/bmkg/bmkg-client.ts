@@ -29,7 +29,7 @@ export class BmkgClient {
           return { payload: (await response.json()) as BmkgRawResponse, requestUri };
         }
 
-        lastError = new Error(`BMKG request failed with HTTP ${response.status}`);
+        lastError = new Error(`BMKG request failed with HTTP ${response.status} for ${requestUri}`);
         if (response.status < 500) break;
       } catch (error: unknown) {
         lastError = error;

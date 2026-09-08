@@ -71,7 +71,7 @@ export const currentProfileId = (request: Request): string => {
 };
 
 export const assertProfileAccess = (request: Request, profileId: string): void => {
-  if (currentProfileId(request) !== profileId && request.auth?.profile.role !== 'admin') {
+  if (currentProfileId(request) !== profileId) {
     const error = new Error('Profile access denied');
     error.name = 'ForbiddenError';
     throw error;

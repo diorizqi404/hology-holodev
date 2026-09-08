@@ -14,15 +14,13 @@ The service-role key is never sent to the browser. It is used only by the backen
 
 | Role | Default access |
 |---|---|
-| `farmer` | Own lands, crop contexts, cases, evidence, reviews, decisions, and briefs |
-| `farmer_group_leader` | Own resources; can participate in trusted review when assigned |
-| `ppl` | Own profile resources; review capability is available through the review endpoint |
-| `admin` | Cross-profile operational access |
+| `farmer` | Own lands, crop contexts, cases, evidence, decisions, and briefs; can request trusted review |
+| `reviewer` | Can submit approve/reject on decision-case reviews (does not need to own the land) |
 
-The current M2 authorization boundary is ownership plus the `admin` override. More granular organization membership can be added later without changing the API contract.
+The current authorization boundary is ownership for farmer resources, plus the `reviewer` role for submitting trusted reviews. Apply migration `003_simplify_profile_roles.sql` after `001` and `002`.
 
 ## BMKG cache
 
 The production adapter uses `SupabaseBmkgCache` backed by `external_source_cache`. The in-memory `BmkgCache` remains available for isolated unit tests. Cache lookup requires `source_name=BMKG`, matching `request_key`/`adm4`, `status=success`, and `expires_at` in the future.
 
-Apply migration `002_decision_record_audit_and_assessment_evidence.sql` after migration `001` before starting the API.
+Apply migrations `001`, `002`, then `003` before starting the API.

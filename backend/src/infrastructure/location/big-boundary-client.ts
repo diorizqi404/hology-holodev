@@ -36,7 +36,7 @@ export class BigBoundaryClient {
 
     const params = new URLSearchParams({
       where: '1=1',
-      geometry: `${coordinates.lon},${coordinates.lat}`,
+      geometry: JSON.stringify({ x: coordinates.lon, y: coordinates.lat }),
       geometryType: 'esriGeometryPoint',
       inSR: '4326',
       spatialRel: 'esriSpatialRelIntersects',
@@ -45,20 +45,26 @@ export class BigBoundaryClient {
       f: 'json',
     });
 
-    let response: Response;
-    try {
-      response = await this.fetcher(`${this.endpoint}?${params}`, {
-        headers: { accept: 'application/json' },
-        signal: AbortSignal.timeout(10_000),
-      });
-    } catch (error: unknown) {
-      throw new Error(
-        `BIG boundary request failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
+    let response: Response | undefined;
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= 1; attempt += 1) {
+      try {
+        response = await this.fetcher(`${this.endpoint}?${params}`, {
+          headers: { accept: 'application/json' },
+          signal: AbortSignal.timeout(8_000),
+        });
+        if (response.ok) break;
+        lastError = new Error(`HTTP ${response.status}`);
+        if (response.status < 500) break;
+      } catch (error: unknown) {
+        lastError = error;
+      }
     }
 
-    if (!response.ok) {
-      throw new Error(`BIG boundary request failed with HTTP ${response.status}`);
+    if (!response?.ok) {
+      throw new Error(
+        `BIG boundary request failed: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+      );
     }
 
     const body = (await response.json()) as BigResponse;
@@ -79,6 +85,7 @@ export class BigBoundaryClient {
       district: firstString(attributes, ['WADMKC', 'KECAMATAN']),
       regency: firstString(attributes, ['WADMKK', 'KABKOTA', 'KOTAKAB']),
       province: firstString(attributes, ['WADMPR', 'PROVINSI']),
+      adm4Candidate: firstString(attributes, ['KDEPUM', 'KDEBPS']),
     };
   }
 }
