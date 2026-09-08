@@ -20,7 +20,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.hology.eepis.web.id/api}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api-hology.eepis.web.id/api}
     container_name: rembuktani-frontend
     restart: unless-stopped
     ports:

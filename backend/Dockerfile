@@ -24,13 +24,14 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copy package files and install only production dependencies
+# Copy package files and install production dependencies + tsx for utility scripts
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev && npm install -g tsx && npm cache clean --force
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/docs ./docs
+COPY scripts/ ./scripts/
 
 # Expose default backend port
 EXPOSE 3000
