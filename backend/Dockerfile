@@ -28,9 +28,10 @@ ENV PORT=3000
 COPY package*.json ./
 RUN npm ci --omit=dev && npm install -g tsx && npm cache clean --force
 
-# Copy built files from builder
+# Copy built files and sources for runtime tools
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/docs ./docs
+COPY src/ ./src/
 COPY scripts/ ./scripts/
 
 # Expose default backend port
